@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,21 +73,21 @@ namespace UnityEditor.UI.Windows {
     public struct ImageCollectionItem {
 
         public Component holder;
-        public Object obj;
+        public UnityEngine.Object obj;
 
     }
 
     public static class EditorHelpers {
 
-        public static Texture2D CollectImages(Object target, List<ImageCollectionItem> images) {
+        public static Texture2D CollectImages(UnityEngine.Object target, List<ImageCollectionItem> images) {
 
             return CollectImages(new[] { target }, images);
 
         }
 
-        public static Texture2D CollectImages(Object[] targets, List<ImageCollectionItem> images) {
+        public static Texture2D CollectImages(UnityEngine.Object[] targets, List<ImageCollectionItem> images) {
             
-            var used = new HashSet<Object>();
+            var used = new HashSet<UnityEngine.Object>();
             var visited = new HashSet<object>();
             var visitedFonts = new HashSet<object>();
             foreach (var target in targets) {
@@ -96,7 +97,7 @@ namespace UnityEditor.UI.Windows {
 
                     EditorHelpers.FindType(component, new[] { typeof(Sprite), typeof(Texture), typeof(Texture2D) }, (fieldInfo, obj) => {
 
-                        if (obj is Object texObj && texObj != null) {
+                        if (obj is UnityEngine.Object texObj && texObj != null) {
                             images.Add(new ImageCollectionItem() {
                                 holder = component,
                                 obj = texObj,
@@ -109,7 +110,7 @@ namespace UnityEditor.UI.Windows {
 
                     EditorHelpers.FindType(component, new[] { typeof(Font), typeof(TMPro.TMP_FontAsset) }, (fieldInfo, obj) => {
 
-                        if (obj is Object texObj && texObj != null) {
+                        if (obj is UnityEngine.Object texObj && texObj != null) {
                             images.Add(new ImageCollectionItem() {
                                 holder = component,
                                 obj = texObj,
@@ -212,7 +213,7 @@ namespace UnityEditor.UI.Windows {
                                 if (System.Array.IndexOf(searchTypes, r.GetType()) >= 0) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchTypes, del, visited);
+                                    if (includeUnityObjects == true || (r is UnityEngine.Object) == false) EditorHelpers.FindType(r, searchTypes, del, visited);
                                     arr.SetValue(r, i);
                                 }
                             }
@@ -222,7 +223,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
                     
                     var obj = field.GetValue(root);
-                    if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchTypes, del, visited);
+                    if (includeUnityObjects == true || (obj is UnityEngine.Object) == false) EditorHelpers.FindType(obj, searchTypes, del, visited);
                     field.SetValue(root, obj);
                     
                 }
@@ -289,7 +290,7 @@ namespace UnityEditor.UI.Windows {
                                     if (check.Invoke(r.GetType(), searchType) == true) {
                                         arr.SetValue(del.Invoke(field, r), i);
                                     } else {
-                                        if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
+                                        if (includeUnityObjects == true || (r is UnityEngine.Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
                                         arr.SetValue(r, i);
                                     }
                                 }
@@ -299,7 +300,7 @@ namespace UnityEditor.UI.Windows {
                     } else {
 
                         var obj = field.GetValue(root);
-                        if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
+                        if (includeUnityObjects == true || (obj is UnityEngine.Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
                         field.SetValue(root, obj);
 
                     }
@@ -316,9 +317,14 @@ namespace UnityEditor.UI.Windows {
                 if (check.Invoke(field.FieldType, searchType) == true) {
 
                     var obj = field.GetValue(root);
+					if (obj == null)
+					{
+						Debug.LogError($"FIELD {field.Name} with type {field.FieldType.Name} is NULL");
+						continue;
+					}
                     field.SetValue(root, del.Invoke(field, obj));
-
-                } else if (field.FieldType.IsArray == true) {
+				} 
+				else if (field.FieldType.IsArray == true) {
                     
                     var arr = (System.Array)field.GetValue(root);
                     if (arr != null) {
@@ -328,9 +334,17 @@ namespace UnityEditor.UI.Windows {
                                 if (check.Invoke(r.GetType(), searchType) == true) {
                                     arr.SetValue(del.Invoke(field, r), i);
                                 } else {
-                                    if (includeUnityObjects == true || (r is Object) == false) EditorHelpers.FindType(r, searchType, del, visited);
-                                    arr.SetValue(r, i);
-                                }
+                                    if (includeUnityObjects == true || (r is UnityEngine.Object) == false) 
+										EditorHelpers.FindType(r, searchType, del, visited);
+									try
+									{
+										arr.SetValue(r, i);
+									}
+									catch (InvalidCastException e)
+									{
+										Debug.LogException(e);
+									}
+								}
                             }
                         }
                     }
@@ -338,7 +352,7 @@ namespace UnityEditor.UI.Windows {
                 } else {
                     
                     var obj = field.GetValue(root);
-                    if (includeUnityObjects == true || (obj is Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
+                    if (includeUnityObjects == true || (obj is UnityEngine.Object) == false) EditorHelpers.FindType(obj, searchType, del, visited);
                     field.SetValue(root, obj);
                     
                 }
@@ -405,7 +419,7 @@ namespace UnityEditor.UI.Windows {
 
         }
         
-        public static void SetFirstSibling(Object[] objects, int siblingIndexTarget = 0) {
+        public static void SetFirstSibling(UnityEngine.Object[] objects, int siblingIndexTarget = 0) {
 
             foreach (var obj in objects) {
 

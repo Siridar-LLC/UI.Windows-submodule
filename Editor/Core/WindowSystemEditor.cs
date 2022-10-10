@@ -360,9 +360,9 @@ namespace UnityEditor.UI.Windows {
 
                                             foreach (var component in allComponents) {
                                             
-                                                EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) => {
-
-                                                    var rField =
+                                                EditorHelpers.FindType(component, typeof(Resource<>), (fieldInfo, res) =>
+												{
+													var rField =
                                                         (res.GetType().GetField("data", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic));
                                                     var r = (Resource)rField.GetValue(res);
                                                     System.Type type = null;
