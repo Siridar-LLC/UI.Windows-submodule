@@ -342,7 +342,8 @@ namespace UnityEditor.UI.Windows {
 									}
 									catch (InvalidCastException e)
 									{
-										Debug.LogException(e);
+										var asset = root as UnityEngine.Object;
+										Debug.LogError($"ROOT: {asset?.name} TYPE:{root?.GetType().Name} EXEPTION:{e.Message}", asset );
 									}
 								}
                             }
