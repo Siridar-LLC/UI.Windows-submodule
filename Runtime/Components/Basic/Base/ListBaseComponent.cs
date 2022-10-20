@@ -517,6 +517,15 @@ namespace UnityEngine.UI.Windows.Components {
                         if (c.onComplete != null) c.onComplete.Invoke(c.data);
                         c.list.isLoadingRequest = false;
                         PoolClass<EmitLoaded>.Recycle(ref c.loadedCounter);
+						
+						for (int j = 0; j < this.componentModules.modules.Length; ++j) {
+
+							var module = this.componentModules.modules[j] as ListComponentModule;
+							if (module == null) continue;
+                
+							module.OnSetItems();
+
+						}
                         
                     }
                     
